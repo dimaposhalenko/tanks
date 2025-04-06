@@ -1,6 +1,7 @@
 from pygame import *
 from random import randint
- 
+from time import time as timer
+
 # фонова музика
 mixer.init()
 mixer.music.load('space.ogg')
@@ -24,7 +25,10 @@ img_back = "galaxy.jpg"  # фон гри
 img_hero = "rocket.png"  # герой
 img_bullet = "bullet.png" # куля
 img_enemy = "ufo.png"  # ворог
- 
+img_ast = "asteroid.png"
+
+
+
 score = 0  # збито кораблів
 lost = 0  # пропущено кораблів
 max_lost = 3 # програли, якщо пропустили стільки
@@ -105,6 +109,28 @@ for i in range(1, 6):
         80, win_width - 80), -40, 80, 50, randint(1, 5))
     monsters.add(monster)
 
+
+
+
+
+
+
+
+
+
+
+
+asteroids = sprite.Group()
+for i in range(1, 6):
+    asteroid = Enemy(img_ast, randint(80, win_width - 80), -40, 80, 50, randint(1, 5))
+    asteroids.add(asteroid)
+
+
+
+
+
+
+
 bullets = sprite.Group()
 
 
@@ -113,6 +139,10 @@ finish = False
 # Основний цикл гри:
 run = True  # прапорець скидається кнопкою закриття вікна
  
+num_fire = 0
+
+rel_time = False
+
 while run:
     # подія натискання на кнопку Закрити
     for e in event.get():
@@ -121,9 +151,15 @@ while run:
 
         elif e.type == KEYDOWN:
             if e.key   == K_SPACE:
-                fire_sound.play()
-                ship.fire()
+                if num_fire < 20 and rel_time == False:
+                    num_fire = num_fire + 1
+                    fire_sound.play()
+                    ship.fire()
 
+
+                if num_fire >= 20 and rel_time == False:
+                    last_time = timer()
+                    rel_time = True
 
     if not finish:
         # оновлюємо фон
@@ -140,11 +176,43 @@ while run:
         ship.update()
         monsters.update()
         bullets.update()
+        asteroids.update()
+
+
 
         # оновлюємо їх у новому місці при кожній ітерації циклу
         ship.reset()
         monsters.draw(window)
         bullets.draw(window)
+        asteroids.draw(window)
+
+
+
+        if rel_time:
+            now_time = timer()
+
+
+
+            if now_time - last_time < 3:
+                reload = font2.render("ПЕРЕЗАРЯДКА ", 1, (150, 0, 0))
+                window.blit(reload, (260, 460))
+            else: 
+                num_fire = 0
+                rel_time = False
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
 
 
         collides = sprite.groupcollide(monsters, bullets, True, True)
